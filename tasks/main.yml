@@ -1,0 +1,49 @@
+---
+
+- name: Create application user
+  user:
+    name: {{ spring_application_user }}
+    createhome: no
+    shell: /sbin/nologin
+
+- name: Create target SpringBoot application path
+  file:
+    path: {{ spring_application_install_base }}/{{ spring_application_name }}
+    state: directory
+    owner: {{ spring_application_user }}
+    mode: 0644
+
+- name: Download SpringBoot application from repository
+  get_url:
+    url: {{ spring_application_download_source }}/
+    dest: {{ spring_application_app_location }}/{{ spring_application_name }}.{{ spring_application_artifact_type }}
+    owner: {{ spring_application_user }}
+    mode: 0744
+    force: yes
+
+- name: Apply template config to target config location
+  template:
+    src: templates/springboot_config.j2
+    dest: {{ spring_application_conf_location }}/{{ spring_application_name }}.conf
+    owner: {{ spring_application_user }}
+    mode: 0600
+
+- name: Create init.d link for application start-up (sysv OSes)
+  file:
+    dest: /etc/init.d/{{ spring_application_name }}
+    src: {{ spring_application_app_location }}/{{ spring_application_name }}.{{ spring_application_artifact_type }}
+    state: link
+    mode: 0644
+  when: (ansible_distribution == "RedHat" and ansible_distribution_major_version == "6")
+
+- name: Create service file for application control (systemd OSes)
+  template:
+    dest: /etc/systemd/system/{{ spring_application_name }}.service
+    src: templates/springboot_systemd_unit.j2
+  when: (ansible_distribution == "RedHat" and ansible_distribution_major_version == "7")
+
+- name: Enable service for SpringBoot application
+  service:
+    name: {{ spring_application_name }}
+    state: started
+    enabled: yes

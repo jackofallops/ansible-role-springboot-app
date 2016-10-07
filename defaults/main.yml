@@ -1,0 +1,13 @@
+---
+spring_application_name: ""
+spring_application_user: root
+spring_application_artifact_type: jar
+spring_application_repository: Releases
+spring_application_repository_path: /{{ spring_application_name }}/{{ spring_application_version }}/{{ spring_application_name }}-{{ spring_application_version }}.{{ spring_application_artifact_type }}
+spring_application_port: 8080
+spring_application_version_string: v0.0.1
+spring_application_download_source: http://{{ artifactory_host }}/{{ spring_application_repository }}/{{ spring_application_repository_path }}
+spring_application_install_base: /app
+spring_application_config_base: /app
+spring_application_config_template: springboot_config.j2
+spring_application_java_opts: ""
